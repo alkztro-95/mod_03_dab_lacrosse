@@ -70,7 +70,7 @@ resources:
               path: ../src/gold/mv_store_performance.sql
           timeout_seconds: 300
 
-        # Task 4: Validate Gold Layer (If/Else Conditional Logic)
+        # Task 4: Validate Gold Layer
         - task_key: validate_gold_data
           depends_on:
             - task_key: create_customer_analytics_view
@@ -82,20 +82,10 @@ resources:
               path: ../src/jobs/validate_gold_data.sql
           timeout_seconds: 300
         
-        # Task 5: Conditional downstream task - Only runs if validation passes
-        - task_key: generate_metrics_report
-          depends_on:
-            - task_key: validate_gold_data
-          condition_task:
-            op: EQUAL_TO
-            left: "{{tasks.validate_gold_data.values.validation_status}}"
-            right: "PASS"
-        
-        # Task 6: For Each - Optimize Gold Tables (by category)
+        # Task 5: For Each - Optimize Gold Tables (by category)
         - task_key: optimize_by_category
           depends_on:
-            - task_key: generate_metrics_report
-              outcome: "true"
+            - task_key: validate_gold_data
           for_each_task:
             inputs: '["daily_sales_summary", "customer_lifetime_value", "sales_by_store", "regional_performance_comparison"]'
             concurrency: 2
@@ -108,17 +98,6 @@ resources:
                 file:
                   path: ../src/jobs/optimize_single_table.sql
         
-        # Task 7: Failure handler - Only runs if validation fails
-        - task_key: handle_validation_failure
-          depends_on:
-            - task_key: generate_metrics_report
-              outcome: "false"
-          sql_task:
-            warehouse_id: ${var.warehouse_id}
-            file:
-              path: ../src/jobs/handle_validation_failure.sql
-          timeout_seconds: 120
-      
       # File arrival trigger - Runs automatically when files arrive
       trigger:
         file_arrival:
