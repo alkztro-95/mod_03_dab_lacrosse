@@ -2,13 +2,13 @@
 -- Semantic layer for customer-centric metrics
 -- Uses SCD2 dim_customers (current records only) joined with fact_sales
 
-CREATE OR REPLACE VIEW ${catalog}.${schema_gold}.mv_customer_analytics
+CREATE OR REPLACE VIEW {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.mv_customer_analytics
 WITH METRICS
 LANGUAGE YAML
 AS $$
   version: 1.1
   
-  source: ${catalog}.${schema_silver}.dim_customers
+  source: {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.dim_customers
   
   filter: __END_AT IS NULL
   
@@ -16,7 +16,7 @@ AS $$
   
   joins:
     - name: sales
-      source: ${catalog}.${schema_silver}.fact_sales
+      source: {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.fact_sales
       on: source.customer_id = sales.customer_id
   
   dimensions:

@@ -2,22 +2,22 @@
 -- Semantic layer for store-level performance metrics
 -- Combines fact_sales with dim_stores and SCD2 dim_customers
 
-CREATE OR REPLACE VIEW ${catalog}.${schema_gold}.mv_store_performance
+CREATE OR REPLACE VIEW {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.mv_store_performance
 WITH METRICS
 LANGUAGE YAML
 AS $$
   version: 1.1
   
-  source: ${catalog}.${schema_silver}.fact_sales
+  source: {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.fact_sales
   
   comment: Store performance metric view with regional and location-type analysis
   
   joins:
     - name: stores
-      source: ${catalog}.${schema_silver}.dim_stores
+      source: {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.dim_stores
       on: source.store_id = stores.store_id
     - name: customers
-      source: ${catalog}.${schema_silver}.dim_customers
+      source: {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.dim_customers
       on: source.customer_id = customers.customer_id AND customers.__END_AT IS NULL
   
   dimensions:

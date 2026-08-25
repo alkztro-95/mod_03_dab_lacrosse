@@ -42,17 +42,47 @@ resources:
             full_refresh: false
           timeout_seconds: 3600
         
-        # Task 3: Validate Gold Layer (If/Else Conditional Logic)
-        - task_key: validate_gold_data
+        # Task 3: Create or replace dashboard views
+        - task_key: create_customer_analytics_view
           depends_on:
             - task_key: run_gold_pipeline
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/gold/mv_customer_analytics.sql
+          timeout_seconds: 300
+
+        - task_key: create_sales_analysis_view
+          depends_on:
+            - task_key: run_gold_pipeline
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/gold/mv_sales_analysis.sql
+          timeout_seconds: 300
+
+        - task_key: create_store_performance_view
+          depends_on:
+            - task_key: run_gold_pipeline
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/gold/mv_store_performance.sql
+          timeout_seconds: 300
+
+        # Task 4: Validate Gold Layer (If/Else Conditional Logic)
+        - task_key: validate_gold_data
+          depends_on:
+            - task_key: create_customer_analytics_view
+            - task_key: create_sales_analysis_view
+            - task_key: create_store_performance_view
           sql_task:
             warehouse_id: ${var.warehouse_id}
             file:
               path: ../src/jobs/validate_gold_data.sql
           timeout_seconds: 300
         
-        # Task 4: Conditional downstream task - Only runs if validation passes
+        # Task 5: Conditional downstream task - Only runs if validation passes
         - task_key: generate_metrics_report
           depends_on:
             - task_key: validate_gold_data
@@ -61,7 +91,7 @@ resources:
             left: "{{tasks.validate_gold_data.values.validation_status}}"
             right: "PASS"
         
-        # Task 5: For Each - Optimize Gold Tables (by category)
+        # Task 6: For Each - Optimize Gold Tables (by category)
         - task_key: optimize_by_category
           depends_on:
             - task_key: generate_metrics_report
@@ -75,20 +105,6 @@ resources:
                 warehouse_id: ${var.warehouse_id}
                 file:
                   path: ../src/jobs/optimize_single_table.sql
-        
-        # Task 6: For Each - Refresh Metric Views
-        - task_key: refresh_metric_views
-          depends_on:
-            - task_key: optimize_by_category
-          for_each_task:
-            inputs: '["mv_sales_analysis", "mv_customer_analytics", "mv_store_performance"]'
-            concurrency: 3
-            task:
-              task_key: refresh_single_mv
-              sql_task:
-                warehouse_id: ${var.warehouse_id}
-                file:
-                  path: ../src/jobs/refresh_single_mv.sql
         
         # Task 7: Failure handler - Only runs if validation fails
         - task_key: handle_validation_failure

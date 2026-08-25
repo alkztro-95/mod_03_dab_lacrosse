@@ -24,7 +24,7 @@ resources:
       continuous: false
       development: false
       
-      # Gold layer SQL files - metrics and metric views
+      # Gold layer SQL files - metrics
       libraries:
         # Gold metrics tables
         - file:
@@ -33,11 +33,3 @@ resources:
             path: ../src/gold/gold_store_metrics.sql
         - file:
             path: ../src/gold/gold_sales_metrics.sql
-        
-        # Metric Views for dashboard
-        - file:
-            path: ../src/gold/mv_customer_analytics.sql
-        - file:
-            path: ../src/gold/mv_sales_analysis.sql
-        - file:
-            path: ../src/gold/mv_store_performance.sql
