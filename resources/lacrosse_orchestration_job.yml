@@ -82,22 +82,6 @@ resources:
               path: ../src/jobs/validate_gold_data.sql
           timeout_seconds: 300
         
-        # Task 5: For Each - Optimize Gold Tables (by category)
-        - task_key: optimize_by_category
-          depends_on:
-            - task_key: validate_gold_data
-          for_each_task:
-            inputs: '["daily_sales_summary", "customer_lifetime_value", "sales_by_store", "regional_performance_comparison"]'
-            concurrency: 2
-            task:
-              task_key: optimize_single_table
-              sql_task:
-                warehouse_id: ${var.warehouse_id}
-                parameters:
-                  table_name: "${var.catalog}.${var.schema_gold}.{{input}}"
-                file:
-                  path: ../src/jobs/optimize_single_table.sql
-        
       # File arrival trigger - Runs automatically when files arrive
       trigger:
         file_arrival:
