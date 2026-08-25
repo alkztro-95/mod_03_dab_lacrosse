@@ -1,0 +1,46 @@
+# Lacrosse Gold Layer Pipeline - Metric Views and Analytics
+# Depends on Silver layer completion
+
+resources:
+  pipelines:
+    lacrosse_gold_pipeline:
+      name: ${var.student_name}_lacrosse_gold_pipeline
+      
+      # Unity Catalog configuration
+      catalog: ${var.catalog}
+      target: ${var.schema_gold}
+      
+      # Pipeline configuration parameters
+      configuration:
+        catalog: ${var.catalog}
+        schema_silver: ${var.schema_silver}
+        schema_gold: ${var.schema_gold}
+      
+      # Storage location for pipeline metadata
+      storage: /Volumes/${var.catalog}/${var.schema_gold}/pipeline_storage
+      
+      # Channel and compute settings
+      channel: CURRENT
+      serverless: true
+      
+      # Pipeline mode
+      continuous: false
+      development: false
+      
+      # Gold layer SQL files - metrics and metric views
+      libraries:
+        # Gold metrics tables
+        - file:
+            path: ../src/gold/gold_customer_metrics.sql
+        - file:
+            path: ../src/gold/gold_store_metrics.sql
+        - file:
+            path: ../src/gold/gold_sales_metrics.sql
+        
+        # Metric Views for dashboard
+        - file:
+            path: ../src/gold/mv_customer_analytics.sql
+        - file:
+            path: ../src/gold/mv_sales_analysis.sql
+        - file:
+            path: ../src/gold/mv_store_performance.sql

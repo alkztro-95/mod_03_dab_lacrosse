@@ -1,0 +1,142 @@
+# Lacrosse Retail Analytics - Orchestration Job
+# Multi-task workflow with conditional logic and notifications
+
+resources:
+  jobs:
+    lacrosse_orchestration_job:
+      name: ${var.student_name}_lacrosse_orchestration_job
+      
+      # Job-level parameters (reused across multiple tasks)
+      parameters:
+        - name: catalog_name
+          default: ${var.catalog}
+        - name: schema_gold
+          default: ${var.schema_gold}
+        - name: student_name
+          default: ${var.student_name}
+        - name: min_row_threshold
+          default: "1"
+      
+      # Email notifications for success and failure
+      email_notifications:
+        on_success:
+          - ${var.student_name}@ulatina.net
+        on_failure:
+          - ${var.student_name}@ulatina.net
+      
+      # Task definitions
+      tasks:
+        # Task 1: Execute Bronze/Silver Pipeline
+        - task_key: run_bronze_silver_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.lacrosse_retail_pipeline.id}
+            full_refresh: false
+          timeout_seconds: 3600
+        
+        # Task 2: Execute Gold Pipeline (depends on Bronze/Silver completion)
+        - task_key: run_gold_pipeline
+          depends_on:
+            - task_key: run_bronze_silver_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.lacrosse_gold_pipeline.id}
+            full_refresh: false
+          timeout_seconds: 3600
+        
+        # Task 3: Validate Gold Layer (If/Else Conditional Logic)
+        - task_key: validate_gold_data
+          depends_on:
+            - task_key: run_gold_pipeline
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            query:
+              query: |
+                -- Validate that gold layer has data
+                SELECT 
+                  COUNT(*) as row_count,
+                  CASE 
+                    WHEN COUNT(*) > CAST('{{job.parameters.min_row_threshold}}' AS INT) THEN 'PASS'
+                    ELSE 'FAIL'
+                  END as validation_status
+                FROM {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.daily_sales_summary
+          timeout_seconds: 300
+        
+        # Task 4: Conditional downstream task - Only runs if validation passes
+        - task_key: generate_metrics_report
+          depends_on:
+            - task_key: validate_gold_data
+              outcome: "true"
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.validate_gold_data.values.validation_status}}"
+            right: "PASS"
+          timeout_seconds: 60
+        
+        # Task 5: For Each - Optimize Gold Tables (by category)
+        - task_key: optimize_by_category
+          depends_on:
+            - task_key: generate_metrics_report
+          for_each_task:
+            inputs: "[daily_sales_summary, customer_lifetime_value, sales_by_store, regional_performance_comparison]"
+            concurrency: 2
+            task:
+              task_key: optimize_single_table
+              sql_task:
+                warehouse_id: ${var.warehouse_id}
+                query:
+                  query: |
+                    -- Optimize individual gold table by category
+                    OPTIMIZE {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.{{input}}
+          timeout_seconds: 1800
+        
+        # Task 6: For Each - Refresh Metric Views
+        - task_key: refresh_metric_views
+          depends_on:
+            - task_key: optimize_by_category
+          for_each_task:
+            inputs: "[mv_sales_analysis, mv_customer_analytics, mv_store_performance]"
+            concurrency: 3
+            task:
+              task_key: refresh_single_mv
+              sql_task:
+                warehouse_id: ${var.warehouse_id}
+                query:
+                  query: |
+                    -- Refresh metric view
+                    REFRESH MATERIALIZED VIEW {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.{{input}}
+          timeout_seconds: 1200
+        
+        # Task 7: Failure handler - Only runs if validation fails
+        - task_key: handle_validation_failure
+          depends_on:
+            - task_key: validate_gold_data
+              outcome: "false"
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            query:
+              query: |
+                -- Log validation failure
+                SELECT 
+                  current_timestamp() as failure_timestamp,
+                  '{{job.parameters.catalog_name}}' as catalog,
+                  '{{job.parameters.schema_gold}}' as schema,
+                  'Gold layer validation failed - insufficient data' as error_message
+          timeout_seconds: 120
+      
+      # File arrival trigger - Runs automatically when files arrive
+      trigger:
+        file_arrival:
+          url: /Volumes/${var.catalog}/${var.schema_bronze}/landing_zone/
+          min_time_between_triggers_seconds: 60  # Wait 1 min between triggers
+        pause_status: UNPAUSED
+      
+      # Optional schedule (currently disabled in favor of file arrival)
+      # schedule:
+      #   quartz_cron_expression: "0 0 8 * * ?"  # Daily at 8 AM
+      #   timezone_id: "America/Costa_Rica"
+      #   pause_status: UNPAUSED
+      
+      # Max concurrent runs
+      max_concurrent_runs: 1
+      
+      # Timeout for the entire job
+      timeout_seconds: 7200  # 2 hours

@@ -1,0 +1,56 @@
+# Lacrosse Retail Pipeline - Spark Declarative Pipeline Definition
+# Bronze → Silver medallion architecture with CDC and SCD Type 2
+
+resources:
+  pipelines:
+    lacrosse_retail_pipeline:
+      name: ${var.student_name}_lacrosse_retail_pipeline
+      
+      # Unity Catalog configuration
+      catalog: ${var.catalog}
+      target: ${var.schema_bronze}
+      
+      # Pipeline configuration parameters
+      configuration:
+        catalog: ${var.catalog}
+        schema_bronze: ${var.schema_bronze}
+        schema_silver: ${var.schema_silver}
+        student_name: ${var.student_name}
+      
+      # Storage location for pipeline metadata and checkpoints
+      storage: /Volumes/${var.catalog}/${var.schema_bronze}/pipeline_storage
+      
+      # Channel and compute settings
+      channel: CURRENT
+      serverless: true
+      
+      # Pipeline mode
+      continuous: false
+      development: true
+      
+      # SQL files to include in the pipeline
+      libraries:
+        # Bronze layer - Auto Loader ingestion
+        - file:
+            path: ../src/bronze/bronze_customers.sql
+        - file:
+            path: ../src/bronze/bronze_stores.sql
+        - file:
+            path: ../src/bronze/bronze_sales_transactions.sql
+        
+        # Silver layer - Cleaned and validated with CDC
+        - file:
+            path: ../src/silver/silver_customers.sql
+        - file:
+            path: ../src/silver/silver_stores.sql
+        - file:
+            path: ../src/silver/silver_sales_transactions.sql
+      
+      # Notifications (optional - can be configured later)
+      # notifications:
+      #   - email_recipients:
+      #       - alfredo.castro@ulatina.net
+      #     alerts:
+      #       - on-update-success
+      #       - on-update-failure
+      #       - on-flow-failure
