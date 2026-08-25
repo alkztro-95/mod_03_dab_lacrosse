@@ -1,0 +1,52 @@
+# dev.yaml
+# Corre: (a) solo "validate" en Pull Request hacia "dev"
+#        (b) validate + deploy + run cuando el código llega a "dev" (push)
+# Despliega contra el target "development" del Lab 08 (databricks.yml),
+# que resuelve a la variable catalog_dev -> catalog "dab_lab_dev".
+
+# Autenticación: OAuth M2M con el service principal sp-dab-dev (no PAT).
+# DATABRICKS_HOST es igual en dev y prod (un solo workspace) -> repo secret.
+# DATABRICKS_CLIENT_ID / DATABRICKS_CLIENT_SECRET son del Environment "dev".
+name: Deploy to dev
+
+on:
+  pull_request:
+    branches:
+      - dev
+  push:
+    branches:
+      - dev
+
+concurrency: dev-${{ github.ref }}
+
+jobs:
+  validate:
+    name: "Validate bundle"
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle validate
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_ENV: development
+
+  deploy:
+    name: "Deploy bundle"
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle deploy
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_ENV: development
+
