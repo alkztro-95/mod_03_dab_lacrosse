@@ -10,6 +10,7 @@ include:
 variables:
   catalog:
     description: Unity Catalog name for the environment
+    default: dab_lacrosse_dev
   schema_bronze:
     description: Bronze schema name
     default: 01_bronze

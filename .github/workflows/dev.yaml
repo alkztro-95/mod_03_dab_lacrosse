@@ -32,6 +32,7 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
           DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_VAR_catalog: dab_lacrosse_dev
           DATABRICKS_BUNDLE_ENV: development
 
   deploy:
@@ -48,5 +49,6 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
           DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_VAR_catalog: dab_lacrosse_dev
           DATABRICKS_BUNDLE_ENV: development
 
