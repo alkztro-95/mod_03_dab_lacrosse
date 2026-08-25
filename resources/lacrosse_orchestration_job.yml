@@ -48,16 +48,8 @@ resources:
             - task_key: run_gold_pipeline
           sql_task:
             warehouse_id: ${var.warehouse_id}
-            query:
-              query: |
-                -- Validate that gold layer has data
-                SELECT 
-                  COUNT(*) as row_count,
-                  CASE 
-                    WHEN COUNT(*) > CAST('{{job.parameters.min_row_threshold}}' AS INT) THEN 'PASS'
-                    ELSE 'FAIL'
-                  END as validation_status
-                FROM {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.daily_sales_summary
+            file:
+              path: ../src/jobs/validate_gold_data.sql
           timeout_seconds: 300
         
         # Task 4: Conditional downstream task - Only runs if validation passes
@@ -82,10 +74,8 @@ resources:
               task_key: optimize_single_table
               sql_task:
                 warehouse_id: ${var.warehouse_id}
-                query:
-                  query: |
-                    -- Optimize individual gold table by category
-                    OPTIMIZE {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.{{input}}
+                file:
+                  path: ../src/jobs/optimize_single_table.sql
           timeout_seconds: 1800
         
         # Task 6: For Each - Refresh Metric Views
@@ -99,10 +89,8 @@ resources:
               task_key: refresh_single_mv
               sql_task:
                 warehouse_id: ${var.warehouse_id}
-                query:
-                  query: |
-                    -- Refresh metric view
-                    REFRESH MATERIALIZED VIEW {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.{{input}}
+                file:
+                  path: ../src/jobs/refresh_single_mv.sql
           timeout_seconds: 1200
         
         # Task 7: Failure handler - Only runs if validation fails
@@ -112,14 +100,8 @@ resources:
               outcome: "false"
           sql_task:
             warehouse_id: ${var.warehouse_id}
-            query:
-              query: |
-                -- Log validation failure
-                SELECT 
-                  current_timestamp() as failure_timestamp,
-                  '{{job.parameters.catalog_name}}' as catalog,
-                  '{{job.parameters.schema_gold}}' as schema,
-                  'Gold layer validation failed - insufficient data' as error_message
+            file:
+              path: ../src/jobs/handle_validation_failure.sql
           timeout_seconds: 120
       
       # File arrival trigger - Runs automatically when files arrive
