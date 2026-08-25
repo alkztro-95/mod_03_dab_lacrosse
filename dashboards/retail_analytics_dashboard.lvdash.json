@@ -3,17 +3,17 @@
     {
       "name": "store_performance",
       "displayName": "Store Performance",
-      "asset_name": "${var.catalog}.03_gold.mv_store_performance"
+      "asset_name": "dab_lacrosse_dev.03_gold.mv_store_performance"
     },
     {
       "name": "customer_analytics",
       "displayName": "Customer Analytics",
-      "asset_name": "${var.catalog}.03_gold.mv_customer_analytics"
+      "asset_name": "dab_lacrosse_dev.03_gold.mv_customer_analytics"
     },
     {
       "name": "sales_analysis",
       "displayName": "Sales Analysis",
-      "asset_name": "${var.catalog}.03_gold.mv_sales_analysis"
+      "asset_name": "dab_lacrosse_dev.03_gold.mv_sales_analysis"
     }
   ],
   "pages": [

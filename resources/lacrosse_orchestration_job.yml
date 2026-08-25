@@ -56,19 +56,18 @@ resources:
         - task_key: generate_metrics_report
           depends_on:
             - task_key: validate_gold_data
-              outcome: "true"
           condition_task:
             op: EQUAL_TO
             left: "{{tasks.validate_gold_data.values.validation_status}}"
             right: "PASS"
-          timeout_seconds: 60
         
         # Task 5: For Each - Optimize Gold Tables (by category)
         - task_key: optimize_by_category
           depends_on:
             - task_key: generate_metrics_report
+              outcome: "true"
           for_each_task:
-            inputs: "[daily_sales_summary, customer_lifetime_value, sales_by_store, regional_performance_comparison]"
+            inputs: '["daily_sales_summary", "customer_lifetime_value", "sales_by_store", "regional_performance_comparison"]'
             concurrency: 2
             task:
               task_key: optimize_single_table
@@ -76,14 +75,13 @@ resources:
                 warehouse_id: ${var.warehouse_id}
                 file:
                   path: ../src/jobs/optimize_single_table.sql
-          timeout_seconds: 1800
         
         # Task 6: For Each - Refresh Metric Views
         - task_key: refresh_metric_views
           depends_on:
             - task_key: optimize_by_category
           for_each_task:
-            inputs: "[mv_sales_analysis, mv_customer_analytics, mv_store_performance]"
+            inputs: '["mv_sales_analysis", "mv_customer_analytics", "mv_store_performance"]'
             concurrency: 3
             task:
               task_key: refresh_single_mv
@@ -91,12 +89,11 @@ resources:
                 warehouse_id: ${var.warehouse_id}
                 file:
                   path: ../src/jobs/refresh_single_mv.sql
-          timeout_seconds: 1200
         
         # Task 7: Failure handler - Only runs if validation fails
         - task_key: handle_validation_failure
           depends_on:
-            - task_key: validate_gold_data
+            - task_key: generate_metrics_report
               outcome: "false"
           sql_task:
             warehouse_id: ${var.warehouse_id}

@@ -17,9 +17,6 @@ resources:
         schema_silver: ${var.schema_silver}
         student_name: ${var.student_name}
       
-      # Storage location for pipeline metadata and checkpoints
-      storage: /Volumes/${var.catalog}/${var.schema_bronze}/pipeline_storage
-      
       # Channel and compute settings
       channel: CURRENT
       serverless: true

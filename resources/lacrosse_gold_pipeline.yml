@@ -16,9 +16,6 @@ resources:
         schema_silver: ${var.schema_silver}
         schema_gold: ${var.schema_gold}
       
-      # Storage location for pipeline metadata
-      storage: /Volumes/${var.catalog}/${var.schema_gold}/pipeline_storage
-      
       # Channel and compute settings
       channel: CURRENT
       serverless: true

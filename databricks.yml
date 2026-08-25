@@ -25,7 +25,7 @@ variables:
     default: castro
   warehouse_id:
     description: SQL Warehouse ID for SQL tasks
-    default: 4ad9f4c30eb74d24
+    default: 62ecb7ccf53424ad
 
 targets:
   # Development environment

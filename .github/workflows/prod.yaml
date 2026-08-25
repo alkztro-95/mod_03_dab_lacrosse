@@ -22,6 +22,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
+      - name: Resolve dashboard catalog
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("dashboards/retail_analytics_dashboard.lvdash.json")
+          dashboard = json.loads(path.read_text())
+
+          def resolve(value):
+            if isinstance(value, dict):
+              return {key: resolve(item) for key, item in value.items()}
+            if isinstance(value, list):
+              return [resolve(item) for item in value]
+            if isinstance(value, str):
+              return value.replace("dab_lacrosse_dev", "dab_lacrosse_prod")
+            return value
+
+          path.write_text(json.dumps(resolve(dashboard), indent=2) + "\n")
+          PY
       - run: databricks bundle validate
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -39,6 +59,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
+      - name: Resolve dashboard catalog
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("dashboards/retail_analytics_dashboard.lvdash.json")
+          dashboard = json.loads(path.read_text())
+
+          def resolve(value):
+            if isinstance(value, dict):
+              return {key: resolve(item) for key, item in value.items()}
+            if isinstance(value, list):
+              return [resolve(item) for item in value]
+            if isinstance(value, str):
+              return value.replace("dab_lacrosse_dev", "dab_lacrosse_prod")
+            return value
+
+          path.write_text(json.dumps(resolve(dashboard), indent=2) + "\n")
+          PY
       - run: databricks bundle deploy -t production
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
