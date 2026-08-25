@@ -2,19 +2,19 @@
 -- Semantic layer with measures and dimensions for sales analytics
 -- Joins fact_sales with SCD2 dim_customers (current records only)
 
-CREATE OR REPLACE VIEW {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.mv_sales_analysis
+CREATE OR REPLACE VIEW dab_lacrosse_dev.03_gold.mv_sales_analysis
 WITH METRICS
 LANGUAGE YAML
 AS $$
   version: 1.1
   
-  source: {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.fact_sales
+  source: dab_lacrosse_dev.02_silver.fact_sales
   
   comment: Sales analysis metric view with customer segmentation
   
   joins:
     - name: customers
-      source: {{job.parameters.catalog_name}}.{{job.parameters.schema_gold}}.dim_customers
+      source: dab_lacrosse_dev.02_silver.dim_customers
       on: source.customer_id = customers.customer_id AND customers.__END_AT IS NULL
   
   dimensions:
