@@ -103,6 +103,8 @@ resources:
               task_key: optimize_single_table
               sql_task:
                 warehouse_id: ${var.warehouse_id}
+                parameters:
+                  table_name: "{{input}}"
                 file:
                   path: ../src/jobs/optimize_single_table.sql
         
