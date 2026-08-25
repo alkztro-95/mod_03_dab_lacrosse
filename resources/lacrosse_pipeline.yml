@@ -9,6 +9,11 @@ resources:
       # Unity Catalog configuration
       catalog: ${var.catalog}
       target: ${var.schema_bronze}
+
+      event_log:
+        catalog: ${var.catalog}
+        schema: ${var.schema_bronze}
+        name: lacrosse_retail_event_log
       
       # Pipeline configuration parameters
       configuration:

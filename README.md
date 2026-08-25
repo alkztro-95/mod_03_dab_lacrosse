@@ -33,6 +33,7 @@ flowchart LR
   calidad y la dimension de clientes mantenida con `APPLY CHANGES INTO` como
   SCD Tipo 2.
 - **Gold:** agregaciones de negocio almacenadas como materialized views.
+- **Monitoreo:** cada SDP publica su Event Log como una tabla Delta en Unity Catalog.
 - **Capa semantica:** tres Metric Views creadas por tareas SQL del Job:
   `mv_customer_analytics`, `mv_sales_analysis` y `mv_store_performance`.
 - **Dashboard:** dashboard Lakeview/AI-BI que consume las Metric Views en lugar
@@ -141,6 +142,22 @@ El trigger por llegada de archivos observa el Volume de aterrizaje Bronze. El
 Job tambien envia notificaciones por correo de exito y fallo segun su definicion
 de recurso.
 
+Los Event Logs se publican en Unity Catalog como:
+
+```text
+<catalog>.01_bronze.lacrosse_retail_event_log
+<catalog>.03_gold.lacrosse_gold_event_log
+```
+
+Consulta un Event Log publicado con:
+
+```sql
+SELECT *
+FROM dab_lacrosse_dev.01_bronze.lacrosse_retail_event_log
+ORDER BY timestamp DESC
+LIMIT 100;
+```
+
 El `For Each` usa un solo archivo SQL fijo e itera sobre nombres de vistas. No
 intenta interpolar una ruta de archivo, porque las rutas de archivos del Bundle
 se resuelven durante el despliegue y no durante la ejecucion del Job.
@@ -214,5 +231,5 @@ Registra el grant real y su verificacion como parte de la evidencia de entrega.
 - [ ] Evidencia de validacion, despliegue y ejecucion del Job en development.
 - [ ] Evidencia de validacion, despliegue y ejecucion del Job en production.
 - [ ] Evidencia del grant de Unity Catalog solo en production.
-- [ ] Event log habilitado y evidencia capturada para los pipelines SDP.
+- [ ] Event Logs publicados en Unity Catalog y evidencia capturada para ambos SDP.
 - [ ] Documento de decisiones con diagramas de arquitectura y CI/CD.
