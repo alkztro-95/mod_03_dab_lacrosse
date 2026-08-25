@@ -42,10 +42,10 @@ jobs:
 
           path.write_text(json.dumps(resolve(dashboard), indent=2) + "\n")
 
-            for path in Path("src/gold").glob("mv_*.sql"):
-              path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
-              for path in Path("src/jobs").glob("*.sql"):
-                path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
+          for path in Path("src/gold").glob("mv_*.sql"):
+            path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
+          for path in Path("src/jobs").glob("*.sql"):
+            path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
           PY
       - run: databricks bundle validate
         env:
@@ -90,6 +90,13 @@ jobs:
                 path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
           PY
       - run: databricks bundle deploy -t production
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_VAR_catalog: dab_lacrosse_prod
+          DATABRICKS_BUNDLE_ENV: production
+      - run: databricks bundle run -t production lacrosse_orchestration_job
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
