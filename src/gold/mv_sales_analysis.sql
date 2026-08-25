@@ -8,13 +8,13 @@ LANGUAGE YAML
 AS $$
   version: 1.1
   
-  source: dab_lacrosse_dev.02_silver.fact_sales
+  source: dab_lacrosse_dev.03_gold.gold_fact_sales
   
   comment: Sales analysis metric view with customer segmentation
   
   joins:
     - name: customers
-      source: dab_lacrosse_dev.02_silver.dim_customers
+      source: dab_lacrosse_dev.03_gold.gold_dim_customers
       on: source.customer_id = customers.customer_id AND customers.__END_AT IS NULL
   
   dimensions:

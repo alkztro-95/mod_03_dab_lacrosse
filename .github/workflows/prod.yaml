@@ -42,7 +42,7 @@ jobs:
 
           path.write_text(json.dumps(resolve(dashboard), indent=2) + "\n")
 
-          for path in Path("src/gold").glob("mv_*.sql"):
+          for path in Path("src/gold").glob("*.sql"):
             path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
           for path in Path("src/jobs").glob("*.sql"):
             path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
@@ -84,7 +84,7 @@ jobs:
 
           path.write_text(json.dumps(resolve(dashboard), indent=2) + "\n")
 
-          for path in Path("src/gold").glob("mv_*.sql"):
+          for path in Path("src/gold").glob("*.sql"):
             path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
           for path in Path("src/jobs").glob("*.sql"):
             path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))

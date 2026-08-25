@@ -32,7 +32,8 @@ flowchart LR
 - **Silver:** datos limpios y tipificados, columnas derivadas, expectations de
   calidad y la dimension de clientes mantenida con `APPLY CHANGES INTO` como
   SCD Tipo 2.
-- **Gold:** agregaciones de negocio almacenadas como materialized views.
+- **Gold:** espejos materializados de los datasets Silver vigentes, usados como
+  base para la capa semántica.
 - **Monitoreo:** cada SDP publica su Event Log como una tabla Delta en Unity Catalog.
 - **Capa semantica:** tres Metric Views creadas por tareas SQL del Job:
   `mv_customer_analytics`, `mv_sales_analysis` y `mv_store_performance`.

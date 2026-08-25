@@ -29,12 +29,7 @@ resources:
       continuous: false
       development: false
       
-      # Gold layer SQL files - metrics
+        # Gold layer SQL files - Silver mirrors
       libraries:
-        # Gold metrics tables
         - file:
-            path: ../src/gold/gold_customer_metrics.sql
-        - file:
-            path: ../src/gold/gold_store_metrics.sql
-        - file:
-            path: ../src/gold/gold_sales_metrics.sql
+            path: ../src/gold/gold_silver_mirrors.sql
