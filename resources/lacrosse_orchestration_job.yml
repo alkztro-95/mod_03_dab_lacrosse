@@ -70,17 +70,23 @@ resources:
               path: ../src/gold/mv_store_performance.sql
           timeout_seconds: 300
 
-        # Task 4: Validate Gold Layer
+        # Task 4: Validate each metric view with For Each
         - task_key: validate_gold_data
           depends_on:
             - task_key: create_customer_analytics_view
             - task_key: create_sales_analysis_view
             - task_key: create_store_performance_view
-          sql_task:
-            warehouse_id: ${var.warehouse_id}
-            file:
-              path: ../src/jobs/validate_gold_data.sql
-          timeout_seconds: 300
+          for_each_task:
+            inputs: '["mv_customer_analytics", "mv_sales_analysis", "mv_store_performance"]'
+            concurrency: 3
+            task:
+              task_key: validate_metric_view
+              sql_task:
+                warehouse_id: ${var.warehouse_id}
+                parameters:
+                  table_name: "${var.catalog}.${var.schema_gold}.{{input}}"
+                file:
+                  path: ../src/jobs/validate_metric_view.sql
         
       # File arrival trigger - Runs automatically when files arrive
       trigger:
