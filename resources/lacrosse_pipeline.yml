@@ -28,7 +28,6 @@ resources:
       
       # Pipeline mode
       continuous: false
-      development: true
       
       # SQL files to include in the pipeline
       libraries:

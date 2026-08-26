@@ -45,5 +45,6 @@ targets:
     mode: production
     workspace:
       host: https://dbc-7c7fae20-e5c4.cloud.databricks.com
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: dab_lacrosse_prod
