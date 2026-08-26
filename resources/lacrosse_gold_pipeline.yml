@@ -29,7 +29,9 @@ resources:
       continuous: false
       development: false
       
-        # Gold layer SQL files - Silver mirrors
+      # Gold layer SQL files - Silver mirrors and temporal enrichment
       libraries:
         - file:
             path: ../src/gold/gold_silver_mirrors.sql
+        - file:
+            path: ../src/gold/gold_customer_sales_store_enriched.sql
