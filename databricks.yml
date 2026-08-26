@@ -23,6 +23,9 @@ variables:
   student_name:
     description: Student identifier for resources
     default: castro
+  notification_email:
+    description: Email address for Job notifications
+    default: alfredo.castro@ulatina.net
   warehouse_id:
     description: SQL Warehouse ID for SQL tasks
     default: 62ecb7ccf53424ad

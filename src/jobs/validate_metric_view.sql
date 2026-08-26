@@ -1,4 +1,4 @@
--- Validate that each metric view contains data.
+-- Validate that the configured Gold or Metric View contains data.
 SELECT assert_true(
   COUNT(*) > 0,
   'Metric view is empty'

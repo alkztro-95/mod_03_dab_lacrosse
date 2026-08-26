@@ -20,9 +20,9 @@ resources:
       # Email notifications for success and failure
       email_notifications:
         on_success:
-          - ${var.student_name}@ulatina.net
+          - ${var.notification_email}
         on_failure:
-          - ${var.student_name}@ulatina.net
+          - ${var.notification_email}
       
       # Task definitions
       tasks:
@@ -42,10 +42,22 @@ resources:
             full_refresh: false
           timeout_seconds: 3600
         
-        # Task 3: Create or replace dashboard views
-        - task_key: create_customer_analytics_view
+        # Task 3: Validate the enriched Gold dataset before creating views
+        - task_key: validate_gold_enriched
           depends_on:
             - task_key: run_gold_pipeline
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            parameters:
+              table_name: "${var.catalog}.${var.schema_gold}.gold_customer_sales_store_enriched"
+            file:
+              path: ../src/jobs/validate_metric_view.sql
+          timeout_seconds: 300
+
+        # Task 4: Create or replace dashboard views
+        - task_key: create_customer_analytics_view
+          depends_on:
+            - task_key: validate_gold_enriched
           sql_task:
             warehouse_id: ${var.warehouse_id}
             file:
@@ -54,7 +66,7 @@ resources:
 
         - task_key: create_sales_analysis_view
           depends_on:
-            - task_key: run_gold_pipeline
+            - task_key: validate_gold_enriched
           sql_task:
             warehouse_id: ${var.warehouse_id}
             file:
@@ -63,15 +75,15 @@ resources:
 
         - task_key: create_store_performance_view
           depends_on:
-            - task_key: run_gold_pipeline
+            - task_key: validate_gold_enriched
           sql_task:
             warehouse_id: ${var.warehouse_id}
             file:
               path: ../src/gold/mv_store_performance.sql
           timeout_seconds: 300
 
-        # Task 4: Validate each metric view with For Each
-        - task_key: validate_gold_data
+        # Task 5: Validate each metric view with For Each
+        - task_key: validate_metric_views
           depends_on:
             - task_key: create_customer_analytics_view
             - task_key: create_sales_analysis_view
@@ -87,6 +99,14 @@ resources:
                   table_name: "${var.catalog}.${var.schema_gold}.{{input}}"
                 file:
                   path: ../src/jobs/validate_metric_view.sql
+
+        # Task 6: Refresh the AI/BI dashboard after all views are ready
+        - task_key: refresh_dashboard
+          depends_on:
+            - task_key: validate_metric_views
+          dashboard_task:
+            dashboard_id: ${resources.dashboards.retail_analytics_dashboard.id}
+            warehouse_id: ${var.warehouse_id}
         
       # File arrival trigger - Runs automatically when files arrive
       trigger:
