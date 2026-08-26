@@ -1,0 +1,37 @@
+# Lacrosse Gold Layer Pipeline - Metric Views and Analytics
+# Depends on Silver layer completion
+
+resources:
+  pipelines:
+    lacrosse_gold_pipeline:
+      name: ${var.student_name}_lacrosse_gold_pipeline
+      
+      # Unity Catalog configuration
+      catalog: ${var.catalog}
+      target: ${var.schema_gold}
+
+      event_log:
+        catalog: ${var.catalog}
+        schema: ${var.schema_gold}
+        name: lacrosse_gold_event_log
+      
+      # Pipeline configuration parameters
+      configuration:
+        catalog: ${var.catalog}
+        schema_silver: ${var.schema_silver}
+        schema_gold: ${var.schema_gold}
+      
+      # Channel and compute settings
+      channel: CURRENT
+      serverless: true
+      
+      # Pipeline mode
+      continuous: false
+      development: false
+      
+      # Gold layer SQL files - Silver mirrors and temporal enrichment
+      libraries:
+        - file:
+            path: ../src/gold/gold_silver_mirrors.sql
+        - file:
+            path: ../src/gold/gold_customer_sales_store_enriched.sql

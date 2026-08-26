@@ -1,0 +1,49 @@
+# Databricks Asset Bundle Configuration
+# Lacrosse Multi-Department Store - Retail Analytics Pipeline
+
+bundle:
+  name: dab_lacrosse
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog name for the environment
+    default: dab_lacrosse_dev
+  schema_bronze:
+    description: Bronze schema name
+    default: 01_bronze
+  schema_silver:
+    description: Silver schema name
+    default: 02_silver
+  schema_gold:
+    description: Gold schema name
+    default: 03_gold
+  student_name:
+    description: Student identifier for resources
+    default: castro
+  notification_email:
+    description: Email address for Job notifications
+    default: alfredo.castro@ulatina.net
+  warehouse_id:
+    description: SQL Warehouse ID for SQL tasks
+    default: 62ecb7ccf53424ad
+
+targets:
+  # Development environment
+  development:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-7c7fae20-e5c4.cloud.databricks.com
+    variables:
+      catalog: dab_lacrosse_dev
+    
+  # Production environment
+  production:
+    mode: production
+    workspace:
+      host: https://dbc-7c7fae20-e5c4.cloud.databricks.com
+    variables:
+      catalog: dab_lacrosse_prod

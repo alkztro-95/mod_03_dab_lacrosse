@@ -1,0 +1,893 @@
+{
+  "datasets": [
+    {
+      "name": "store_performance",
+      "displayName": "Store Performance",
+      "asset_name": "dab_lacrosse_dev.03_gold.mv_store_performance"
+    },
+    {
+      "name": "customer_analytics",
+      "displayName": "Customer Analytics",
+      "asset_name": "dab_lacrosse_dev.03_gold.mv_customer_analytics"
+    },
+    {
+      "name": "sales_analysis",
+      "displayName": "Sales Analysis",
+      "asset_name": "dab_lacrosse_dev.03_gold.mv_sales_analysis"
+    }
+  ],
+  "pages": [
+    {
+      "name": "9c59bd89",
+      "displayName": "Page 1",
+      "layout": [
+        {
+          "widget": {
+            "name": "total_customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "customer_analytics",
+                  "fields": [
+                    {
+                      "name": "measure(customer_count)",
+                      "expression": "MEASURE(`customer_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Customers",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(customer_count)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "total_revenue",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_analysis",
+                  "fields": [
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Revenue",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(total_revenue)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "avg_transaction",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "customer_analytics",
+                  "fields": [
+                    {
+                      "name": "measure(avg_transaction_value)",
+                      "expression": "MEASURE(`avg_transaction_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Avg Transaction Value",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(avg_transaction_value)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "clv_by_tier",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "customer_analytics",
+                  "fields": [
+                    {
+                      "name": "loyalty_tier",
+                      "expression": "`loyalty_tier`"
+                    },
+                    {
+                      "name": "measure(total_lifetime_value)",
+                      "expression": "MEASURE(`total_lifetime_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Customer Lifetime Value by Loyalty Tier",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "loyalty_tier",
+                  "displayName": "loyalty_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_lifetime_value)",
+                  "displayName": "total_lifetime_value",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "loyalty_tier",
+                  "displayName": "loyalty_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "customers_by_tier",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "customer_analytics",
+                  "fields": [
+                    {
+                      "name": "loyalty_tier",
+                      "expression": "`loyalty_tier`"
+                    },
+                    {
+                      "name": "measure(customer_count)",
+                      "expression": "MEASURE(`customer_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Customer Count by Loyalty Tier",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "loyalty_tier",
+                  "displayName": "loyalty_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(customer_count)",
+                  "displayName": "customer_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "loyalty_tier",
+                  "displayName": "loyalty_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 3,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "customers_by_state",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "customer_analytics",
+                  "fields": [
+                    {
+                      "name": "state",
+                      "expression": "`state`"
+                    },
+                    {
+                      "name": "measure(customer_count)",
+                      "expression": "MEASURE(`customer_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top States by Customer Count",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "state",
+                  "displayName": "state",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(customer_count)",
+                  "displayName": "customer_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "state",
+                  "displayName": "state",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "customer_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "customer_analytics",
+                  "fields": [
+                    {
+                      "name": "loyalty_tier",
+                      "expression": "`loyalty_tier`"
+                    },
+                    {
+                      "name": "measure(customer_count)",
+                      "expression": "MEASURE(`customer_count`)"
+                    },
+                    {
+                      "name": "measure(avg_lifetime_value)",
+                      "expression": "MEASURE(`avg_lifetime_value`)"
+                    },
+                    {
+                      "name": "measure(avg_transactions_per_customer)",
+                      "expression": "MEASURE(`avg_transactions_per_customer`)"
+                    },
+                    {
+                      "name": "measure(avg_transaction_value)",
+                      "expression": "MEASURE(`avg_transaction_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Customer Analytics by Tier",
+                "showTitle": true
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "loyalty_tier"
+                  },
+                  {
+                    "fieldName": "measure(customer_count)"
+                  },
+                  {
+                    "fieldName": "measure(avg_lifetime_value)"
+                  },
+                  {
+                    "fieldName": "measure(avg_transactions_per_customer)"
+                  },
+                  {
+                    "fieldName": "measure(avg_transaction_value)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_analysis",
+                  "fields": [
+                    {
+                      "name": "monthly(transaction_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `transaction_date`)"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Monthly Revenue Trend",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(transaction_date)",
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_revenue)",
+                  "displayName": "total_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 12,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_by_region",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_analysis",
+                  "fields": [
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue by Region",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "region",
+                  "displayName": "region",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_revenue)",
+                  "displayName": "total_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "region",
+                  "displayName": "region",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_by_location",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_analysis",
+                  "fields": [
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    },
+                    {
+                      "name": "location_type",
+                      "expression": "`location_type`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue by Location Type",
+                "showTitle": true
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "measure(total_revenue)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "total_revenue"
+                },
+                "color": {
+                  "fieldName": "location_type",
+                  "displayName": "location_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 18,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "top_stores",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "store_performance",
+                  "fields": [
+                    {
+                      "name": "store_name",
+                      "expression": "`store_name`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top 10 Stores by Revenue",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "store_name",
+                  "displayName": "store_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_revenue)",
+                  "displayName": "total_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "store_name",
+                  "displayName": "store_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 23,
+            "width": 12,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_by_category",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_analysis",
+                  "fields": [
+                    {
+                      "name": "category",
+                      "expression": "`category`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue by Product Category",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "category",
+                  "displayName": "category",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_revenue)",
+                  "displayName": "total_revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "category",
+                  "displayName": "category",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 28,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "store_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "store_performance",
+                  "fields": [
+                    {
+                      "name": "store_name",
+                      "expression": "`store_name`"
+                    },
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "location_type",
+                      "expression": "`location_type`"
+                    },
+                    {
+                      "name": "measure(total_revenue)",
+                      "expression": "MEASURE(`total_revenue`)"
+                    },
+                    {
+                      "name": "measure(transaction_count)",
+                      "expression": "MEASURE(`transaction_count`)"
+                    },
+                    {
+                      "name": "measure(unique_customers)",
+                      "expression": "MEASURE(`unique_customers`)"
+                    },
+                    {
+                      "name": "measure(avg_transaction_value)",
+                      "expression": "MEASURE(`avg_transaction_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Store Performance Details",
+                "showTitle": true
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "store_name"
+                  },
+                  {
+                    "fieldName": "region"
+                  },
+                  {
+                    "fieldName": "location_type"
+                  },
+                  {
+                    "fieldName": "measure(total_revenue)"
+                  },
+                  {
+                    "fieldName": "measure(transaction_count)"
+                  },
+                  {
+                    "fieldName": "measure(unique_customers)"
+                  },
+                  {
+                    "fieldName": "measure(avg_transaction_value)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 28,
+            "width": 6,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#F5F7FA",
+        "dark": "#1A1D24"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#252932"
+      },
+      "widgetBorderColor": {
+        "light": "#E1E5EB",
+        "dark": "#363C47"
+      },
+      "selectionColor": {
+        "light": "#3B82F6",
+        "dark": "#60A5FA"
+      },
+      "visualizationColors": [
+        "#3B82F6",
+        "#10B981",
+        "#F59E0B",
+        "#EF4444",
+        "#8B5CF6",
+        "#EC4899",
+        "#14B8A6",
+        "#F97316",
+        "#06B6D4",
+        "#6366F1"
+      ],
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED",
+      "widgetPadding": 16,
+      "widgetMargin": 12,
+      "widgetCornerRadius": 8,
+      "widgetShadow": 10,
+      "fontSettings": {
+        "base": {
+          "fontFamily": "Inter",
+          "fontColor": {
+            "light": "#2C3E50",
+            "dark": "#E8EAED"
+          },
+          "fontSize": 14
+        },
+        "widgetTitle": {
+          "fontFamily": "Inter",
+          "fontColor": {
+            "light": "#1A202C",
+            "dark": "#FFFFFF"
+          },
+          "fontSize": 16,
+          "fontWeight": 600
+        },
+        "fieldTitle": {
+          "fontFamily": "Inter",
+          "fontColor": {
+            "light": "#4A5568",
+            "dark": "#A0AEC0"
+          },
+          "fontSize": 12,
+          "fontWeight": 500
+        },
+        "fieldValue": {
+          "fontFamily": "Inter",
+          "fontColor": {
+            "light": "#2D3748",
+            "dark": "#E2E8F0"
+          },
+          "fontSize": 14,
+          "fontWeight": 400
+        }
+      },
+      "gridLineColor": {
+        "light": "#E5E7EB",
+        "dark": "#374151"
+      }
+    },
+    "applyModeEnabled": false
+  }
+}

@@ -1,0 +1,128 @@
+# Lacrosse Retail Analytics - Orchestration Job
+# Multi-task workflow with conditional logic and notifications
+
+resources:
+  jobs:
+    lacrosse_orchestration_job:
+      name: ${var.student_name}_lacrosse_orchestration_job
+      
+      # Job-level parameters (reused across multiple tasks)
+      parameters:
+        - name: catalog_name
+          default: ${var.catalog}
+        - name: schema_gold
+          default: ${var.schema_gold}
+        - name: student_name
+          default: ${var.student_name}
+        - name: min_row_threshold
+          default: "1"
+      
+      # Email notifications for success and failure
+      email_notifications:
+        on_success:
+          - ${var.notification_email}
+        on_failure:
+          - ${var.notification_email}
+      
+      # Task definitions
+      tasks:
+        # Task 1: Execute Bronze/Silver Pipeline
+        - task_key: run_bronze_silver_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.lacrosse_retail_pipeline.id}
+            full_refresh: false
+          timeout_seconds: 3600
+        
+        # Task 2: Execute Gold Pipeline (depends on Bronze/Silver completion)
+        - task_key: run_gold_pipeline
+          depends_on:
+            - task_key: run_bronze_silver_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.lacrosse_gold_pipeline.id}
+            full_refresh: false
+          timeout_seconds: 3600
+        
+        # Task 3: Validate the enriched Gold dataset before creating views
+        - task_key: validate_gold_enriched
+          depends_on:
+            - task_key: run_gold_pipeline
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            parameters:
+              table_name: "${var.catalog}.${var.schema_gold}.gold_customer_sales_store_enriched"
+            file:
+              path: ../src/jobs/validate_metric_view.sql
+          timeout_seconds: 300
+
+        # Task 4: Create or replace dashboard views
+        - task_key: create_customer_analytics_view
+          depends_on:
+            - task_key: validate_gold_enriched
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/gold/mv_customer_analytics.sql
+          timeout_seconds: 300
+
+        - task_key: create_sales_analysis_view
+          depends_on:
+            - task_key: validate_gold_enriched
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/gold/mv_sales_analysis.sql
+          timeout_seconds: 300
+
+        - task_key: create_store_performance_view
+          depends_on:
+            - task_key: validate_gold_enriched
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/gold/mv_store_performance.sql
+          timeout_seconds: 300
+
+        # Task 5: Validate each metric view with For Each
+        - task_key: validate_metric_views
+          depends_on:
+            - task_key: create_customer_analytics_view
+            - task_key: create_sales_analysis_view
+            - task_key: create_store_performance_view
+          for_each_task:
+            inputs: '["mv_customer_analytics", "mv_sales_analysis", "mv_store_performance"]'
+            concurrency: 3
+            task:
+              task_key: validate_metric_view
+              sql_task:
+                warehouse_id: ${var.warehouse_id}
+                parameters:
+                  table_name: "${var.catalog}.${var.schema_gold}.{{input}}"
+                file:
+                  path: ../src/jobs/validate_metric_view.sql
+
+        # Task 6: Refresh the AI/BI dashboard after all views are ready
+        - task_key: refresh_dashboard
+          depends_on:
+            - task_key: validate_metric_views
+          dashboard_task:
+            dashboard_id: ${resources.dashboards.retail_analytics_dashboard.id}
+            warehouse_id: ${var.warehouse_id}
+        
+      # File arrival trigger - Runs automatically when files arrive
+      trigger:
+        file_arrival:
+          url: /Volumes/${var.catalog}/${var.schema_bronze}/landing_zone/
+          min_time_between_triggers_seconds: 60  # Wait 1 min between triggers
+        pause_status: UNPAUSED
+      
+      # Optional schedule (currently disabled in favor of file arrival)
+      # schedule:
+      #   quartz_cron_expression: "0 0 8 * * ?"  # Daily at 8 AM
+      #   timezone_id: "America/Costa_Rica"
+      #   pause_status: UNPAUSED
+      
+      # Max concurrent runs
+      max_concurrent_runs: 1
+      
+      # Timeout for the entire job
+      timeout_seconds: 7200  # 2 hours

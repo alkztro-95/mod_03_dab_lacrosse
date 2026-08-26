@@ -1,0 +1,105 @@
+# prod.yaml
+# Misma estructura que dev.yaml, target "production" (catalog_prod ->
+# dab_lab_prod). Autenticado con sp-dab-prod vía OAuth M2M. Sin
+# --refresh-all: incremental.
+name: Deploy to prod
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency: prod-${{ github.ref }}
+
+jobs:
+  validate:
+    name: "Validate bundle"
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - name: Resolve dashboard catalog
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("dashboards/retail_analytics_dashboard.lvdash.json")
+          dashboard = json.loads(path.read_text())
+
+          def resolve(value):
+            if isinstance(value, dict):
+              return {key: resolve(item) for key, item in value.items()}
+            if isinstance(value, list):
+              return [resolve(item) for item in value]
+            if isinstance(value, str):
+              return value.replace("dab_lacrosse_dev", "dab_lacrosse_prod")
+            return value
+
+          path.write_text(json.dumps(resolve(dashboard), indent=2) + "\n")
+
+          for path in Path("src/gold").glob("*.sql"):
+            path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
+          for path in Path("src/jobs").glob("*.sql"):
+            path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
+          PY
+      - run: databricks bundle validate
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_VAR_catalog: dab_lacrosse_prod
+          DATABRICKS_BUNDLE_ENV: production
+
+  deploy:
+    name: "Deploy bundle"
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - name: Resolve dashboard catalog
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("dashboards/retail_analytics_dashboard.lvdash.json")
+          dashboard = json.loads(path.read_text())
+
+          def resolve(value):
+            if isinstance(value, dict):
+              return {key: resolve(item) for key, item in value.items()}
+            if isinstance(value, list):
+              return [resolve(item) for item in value]
+            if isinstance(value, str):
+              return value.replace("dab_lacrosse_dev", "dab_lacrosse_prod")
+            return value
+
+          path.write_text(json.dumps(resolve(dashboard), indent=2) + "\n")
+
+          for path in Path("src/gold").glob("*.sql"):
+            path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
+          for path in Path("src/jobs").glob("*.sql"):
+            path.write_text(path.read_text().replace("dab_lacrosse_dev", "dab_lacrosse_prod"))
+          PY
+      - run: databricks bundle deploy -t production
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_VAR_catalog: dab_lacrosse_prod
+          DATABRICKS_BUNDLE_ENV: production
+      - run: databricks bundle run -t production lacrosse_orchestration_job
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+          DATABRICKS_BUNDLE_VAR_catalog: dab_lacrosse_prod
+          DATABRICKS_BUNDLE_ENV: production

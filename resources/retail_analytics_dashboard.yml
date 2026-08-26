@@ -1,0 +1,20 @@
+# Retail Analytics Dashboard - Lakeview Dashboard
+# Visualizations based on Metric Views
+
+resources:
+  dashboards:
+    retail_analytics_dashboard:
+      display_name: ${var.student_name}_Retail_Analytics_Dashboard
+      
+      # Dashboard configuration
+      warehouse_id: ${var.warehouse_id}
+      
+      # Path to the dashboard file (relative to bundle root)
+      # Note: The actual dashboard file needs to be in the bundle
+      file_path: ../dashboards/retail_analytics_dashboard.lvdash.json
+      
+      # Embed credentials for dashboard viewers
+      embed_credentials: true
+      
+      # Dashboard datasets - connected to Metric Views
+      # These will be automatically resolved when the dashboard is deployed
