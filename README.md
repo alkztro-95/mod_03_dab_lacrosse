@@ -32,8 +32,9 @@ flowchart LR
 - **Silver:** datos limpios y tipificados, columnas derivadas, expectations de
   calidad y la dimension de clientes mantenida con `APPLY CHANGES INTO` como
   SCD Tipo 2.
-- **Gold:** espejos materializados de los datasets Silver vigentes, usados como
-  base para la capa semántica.
+- **Gold:** espejos materializados de los datasets Silver vigentes y una vista
+  materializada enriquecida que une ventas, clientes y tiendas respetando la
+  vigencia temporal del SCD Tipo 2.
 - **Monitoreo:** cada SDP publica su Event Log como una tabla Delta en Unity Catalog.
 - **Capa semantica:** tres Metric Views creadas por tareas SQL del Job:
   `mv_customer_analytics`, `mv_sales_analysis` y `mv_store_performance`.
@@ -136,8 +137,10 @@ El Job de orquestacion ejecuta estas etapas:
 
 1. Ejecutar el pipeline Bronze/Silver.
 2. Ejecutar el pipeline Gold.
-3. Crear o reemplazar las tres Metric Views con tareas SQL.
-4. Usar una tarea `For Each` para validar que las tres Metric Views contengan datos.
+3. Validar que `gold_customer_sales_store_enriched` contenga registros.
+4. Crear o reemplazar las tres Metric Views con tareas SQL.
+5. Usar una tarea `For Each` para validar que las tres Metric Views contengan datos.
+6. Refrescar el dashboard AI/BI.
 
 El trigger por llegada de archivos observa el Volume de aterrizaje Bronze. El
 Job tambien envia notificaciones por correo de exito y fallo segun su definicion
@@ -149,6 +152,15 @@ Los Event Logs se publican en Unity Catalog como:
 <catalog>.01_bronze.lacrosse_retail_event_log
 <catalog>.03_gold.lacrosse_gold_event_log
 ```
+
+La vista Gold enriquecida se publica como:
+
+```text
+<catalog>.03_gold.gold_customer_sales_store_enriched
+```
+
+Su join temporal relaciona cada transaccion con la version de cliente vigente
+en la fecha de la transaccion, usando `__START_AT` y `__END_AT`.
 
 Consulta un Event Log publicado con:
 
@@ -208,29 +220,3 @@ views Gold.
 
 Los Environments `dev` y `prod` aislan sus credenciales OAuth. Agrega revisores
 obligatorios al Environment `prod` cuando se requiera aprobacion para production.
-
-## Gobernanza con Unity Catalog
-
-Otorga al docente acceso solamente a la Metric View o al dashboard de production.
-No otorgues acceso a datos Silver, al catalogo de development ni al Job. Ejemplo
-de SQL, usando el correo real del docente y el nombre final del objeto:
-
-```sql
-GRANT SELECT ON TABLE dab_lacrosse_prod.03_gold.mv_customer_analytics
-TO `instructor@example.com`;
-```
-
-Registra el grant real y su verificacion como parte de la evidencia de entrega.
-
-## Checklist de entrega
-
-- [ ] Corridas exitosas de los pipelines Bronze/Silver y Gold.
-- [ ] Evidencia de CDC/SCD Tipo 2 para batch 1 y batch 2.
-- [ ] Corrida exitosa del Job, incluyendo las tres iteraciones de `For Each`.
-- [ ] Evidencia del trigger por llegada de archivos.
-- [ ] Captura del dashboard con datos y al menos dos tipos de visualizacion.
-- [ ] Evidencia de validacion, despliegue y ejecucion del Job en development.
-- [ ] Evidencia de validacion, despliegue y ejecucion del Job en production.
-- [ ] Evidencia del grant de Unity Catalog solo en production.
-- [ ] Event Logs publicados en Unity Catalog y evidencia capturada para ambos SDP.
-- [ ] Documento de decisiones con diagramas de arquitectura y CI/CD.
