@@ -45,6 +45,11 @@ AS $$
       expr: source.location_type
       display_name: Store Location Type
       comment: Type of store location (Downtown, Suburban, Mall)
+
+    - name: transaction_date
+      expr: source.transaction_date
+      display_name: Transaction Date
+      comment: Date and time of the transaction
       
     - name: transaction_month
       expr: source.transaction_month
